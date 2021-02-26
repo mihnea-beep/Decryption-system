@@ -1,6 +1,6 @@
 ----------------------------------------------
 
-## Prezentarea generala a solutiei:
+## Prezentarea generala a sistemului:
 
 Am tratat implementarea in 3 etape:
 
