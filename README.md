@@ -13,28 +13,28 @@ In continuare sunt prezentate pe scurt modulele si logica din spatele acestora, 
 
 ## Modulele:
 
-- decryption_regfile:	 Acesta functioneaza ca un banc de registre obisnuit. In functie de semnalele read/write se face cate un
+- *decryption_regfile*:	 Acesta functioneaza ca un banc de registre obisnuit. In functie de semnalele read/write se face cate un
 tip de acces, care consta in scrierea/citirea de date la o adresa (valida sau nu). Daca aceasta nu exista, se ridica un semnal de eroare,
 iar in caz contrar, se realizeaza scrierea/citirea. Semnalul done se activeaza doar in timpul citirii/scrierii, indiferent daca adresa este una valida sau nu.
 Acesta este dezactivat dupa realizarea scrierii/citirii. In mod similar, eroarea se dezactiveaza pe urmatorul front pozitiv al ceasului, dupa ce a fost activata.
 
-- caesar_decryption: Decriptarea cezar presupune scaderea unei valori (key) din numarul ce reprezinta fiecare caracter
+- *caesar_decryption*: Decriptarea cezar presupune scaderea unei valori (key) din numarul ce reprezinta fiecare caracter
 in cod ASCII, pentru fiecare caracter al textului criptat.
 
-- scytale_decryption: In mare, decriptarea scytale presupune plecarea de la primul caracter din cuvantul criptat si deplasarea
+- *scytale_decryption*: In mare, decriptarea scytale presupune plecarea de la primul caracter din cuvantul criptat si deplasarea
 la dreapta cu key_N caractere pentru selectarea urmatorului caracter in cuvantul decriptat. Cand se ajunge la un index
 inexistent/se depaseste numarul total de caractere, se pleaca de la al doilea caracter si procedura se repeta.
 Nu a fost nevoie sa utilizez cheia key_M.
 
-- zigzag_decryption: Decriptarea zigzag se realizeaza in mod diferit, in functie de cheia primita. Am folosit algoritmi separati ce
+- *zigzag_decryption*: Decriptarea zigzag se realizeaza in mod diferit, in functie de cheia primita. Am folosit algoritmi separati ce
 se aplica in functie de cheie si de numarul de caractere.
 
-- demux: Modulul demux depinde de 2 ceasuri, clk_sys si clk_mst, dintre care clk_mst este de 4 ori mai lent.
+- *demux*: Modulul demux depinde de 2 ceasuri, clk_sys si clk_mst, dintre care clk_mst este de 4 ori mai lent.
 Astfel, am impartit logica in 2 structuri always.
 
-- mux: Modulul mux functioneaza ca un multiplexor obisnuit, tinandu-se cont de un singur ceas si de reset.
+- *mux*: Modulul mux functioneaza ca un multiplexor obisnuit, tinandu-se cont de un singur ceas si de reset.
 
-- decryption_top:
+- *decryption_top*:
 
 	Modulul decryption_top conecteaza toate modulele anterioare, precum si semnalele de busy corespunzatoare fiecarui modul de decriptare (printr-un OR gate cu 3 intrari).
 
@@ -42,14 +42,15 @@ Astfel, am impartit logica in 2 structuri always.
 
 ## Explicarea portiunilor complexe
 
-In general, pentru a manipula grupuri specifice de biti din variabilele folosite la fiecare etapa, am folosit operatorul +: din bonusul primei teme.
-Pentru a realiza imparitiri, am folosit algoritmul de impartire cu rest din modulul division al primei teme.
+In general, pentru a manipula grupuri specifice de biti din variabilele folosite la fiecare etapa, am folosit operatorul +:.
+Pentru a realiza imparitiri, am folosit algoritmul de impartire cu rest a carui implementare este descrisa in acest repository:
+https://github.com/mihnea-beep/Temperature-monitoring-system#detalii-de-implementare
 
-- scytale_decryption: - Disclaimer: Am adaugat o conditie suplimentara pentru scytale_decryption la task 3, deoarece semnalul
+- scytale_decryption: - Disclaimer: Am adaugat o conditie suplimentara pentru scytale_decryption in etapa 3, deoarece semnalul
 valid_i era mai lung decat sirul de caractere trimise, anume: if(valid_i == 1 && data_i != 0), pentru a asigura faptul ca nu mai
 sunt luate in considerare caracterele nule, chiar daca valid_i ramane activ.
 
-###In cadrul decriptarii scytale, am folosit urmatoarea logica:
+### In cadrul decriptarii *scytale*, am folosit urmatoarea logica:
 
 - Datele se citesc atat timp cat semnalul valid_input este activ, iar datele nu sunt nule. Cat timp literele sunt diferite de caracterul
 special 0xFA, sunt numarate caracterele, stocate datele (in variabila full_text) si actulaizata pozitia, adica deplasarea prin full_text
@@ -73,7 +74,8 @@ Pe urmatorul front pozitiv, indexul caracterului curent depaseste numarul de car
 
 Cand busy si valid_output sunt 0, sunt resetate si variabilele utilizate in cadrul decriptarii.
 
-- zigzag_decryption: Similar cu decriptarea scytale, datele pentru decriptare sunt stocate intr-o variabila de tip reg, enc_data,
+### *zigzag_decryption*:
+Similar cu decriptarea scytale, datele pentru decriptare sunt stocate intr-o variabila de tip reg, enc_data,
 iar numarul de caractere, nof_chars este incrementat cu 1, atat timp cat semnalul de valid_input este activ, iar data_input nu este
 nul si cat timp nu se intalneste caracterul special, 0xFA. La intalnirea acestuia, semnalul de trigger, end_of_transmission se activeaza,
 iar din numarul de caractere (mai mare cu 1) se scade 1. Trigger-ul declanseaza activarea lui busy pe urmatorul front al ceasului.
@@ -97,7 +99,7 @@ Pentru cheia 3, am gasit o regula care functioneaza pentru anumite cuvinte cript
 
 0 4 12 5 1 6 13 7 2 8 14 9 3 10 15 11
 
-Se obtin urmatoarele cicluri sub forma de "matrice":
+Se obtin urmatoarele *cicluri* sub forma de "matrice":
 
 [0 4 12 5]
 [1 6 13 7]
@@ -151,13 +153,13 @@ Pentru j = 0, caracterul curent va fi cel de pe pozitia idx_i (din indecsii de i
 Regula decripteaza complet doar anumite input-uri.
 
 
-## demux: In structura care depinde de master, always @(posedge clk_mst):
+## *demux*: In structura care depinde de *master*, always @(posedge clk_mst):
 
 - Daca valid_input este activ, se stocheaza datele primite (stored_data) si se activeaza semnalul de valid_output pentru
 select-ul corespunzator. Daca valid_input este 0, atunci valid_output devine 0 pentru   toate semnalele, iar stored_data
 devine 0. (ca un reset in functie de input).
 
-### In structura care depinde de sistem, always @(posedge clk_sys):
+### In structura care depinde de *sistem*, *always @(posedge clk_sys)*:
 
 - Am folosit mai multe variabile de tip contor pentru a tine cont de numarul de fronturi pozitive ale ceasului clk_sys
 si de indexul corespunzator caracterului ce trebuie afisat din stored_data sau data_i. Astfel, transmission_index este un
@@ -184,11 +186,14 @@ data_output ia valoarea primului caracter direct din data_i. Restul caracterelor
 
 
 
-## mux: In functie de valoarea semnalului select (0, 1, 2) si de activarea semnalelor de tip valid_input, (valid0/1/2_i),
+## *mux*:
+In functie de valoarea semnalului select (0, 1, 2) si de activarea semnalelor de tip valid_input, (valid0/1/2_i),
 pe semnalul de iesire data_o se punea valoarea corespunzatoare (respectiv data0/1/2_i), iar valid_o devine activ.
 Pentru semnalele valid_input 0, iesirile vor fi 0.
 
-## decryption_top: Selectie biti specifici
+## *decryption_top*:
+
+*Selectie biti specifici*
 
 - select: Din cauza variatiei marimii semnalului select (16 biti in decryption_regfile si 2 biti in demux si mux), am selectat doar bitii 1 si 0 in mux si demux.
 - scytale_key: scytale_key este impartit in 2 semnale de 8 biti pentru cele doua chei (scytale_key[15: 8], scytale_key[7 : 0])

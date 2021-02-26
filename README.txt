@@ -147,7 +147,7 @@ Pentru j = 0, caracterul curent va fi cel de pe pozitia idx_i (din indecsii de i
 Regula decripteaza complet doar anumite input-uri.
 
 
-## demux: In structura care depinde de master, always @(posedge clk_mst):
+- demux: In structura care depinde de master, always @(posedge clk_mst):
 
 	- Daca valid_input este activ, se stocheaza datele primite (stored_data) si se activeaza semnalul de valid_output pentru
 select-ul corespunzator. Daca valid_input este 0, atunci valid_output devine 0 pentru   toate semnalele, iar stored_data
