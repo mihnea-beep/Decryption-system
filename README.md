@@ -2,8 +2,14 @@
 
 ## Prezentarea generala a solutiei:
 
-	Am gandit separat implementarea fiecarui task, tratand modulele ca pe niste sisteme de tip black-box (acestea putand fi testate individual, in afara de decryption_top).
-	In continuare sunt prezentate pe scurt modulele si logica din spatele acestora, iar in -- Explicarea portiunilor complexe sunt elaborate ideile pe care le-am considerat importante din anumite module.
+Am tratat implementarea in 3 etape:
+
+- implementarea bancului de registri
+- implementarea algoritmilor propriu-zisi
+- realizarea logicii selectiei semnalelor si a conexiunilor intre modulele create anterior
+
+Am considerat modulele niste sisteme de tip black-box (acestea putand fi testate individual, in afara de decryption_top).
+In continuare sunt prezentate pe scurt modulele si logica din spatele acestora, iar in -- Explicarea portiunilor complexe sunt elaborate ideile pe care le-am considerat importante din anumite module.
 
 ## Modulele:
 
@@ -36,14 +42,14 @@ Astfel, am impartit logica in 2 structuri always.
 
 ## Explicarea portiunilor complexe
 
-	In general, pentru a manipula grupuri specifice de biti din variabilele folosite la fiecare task, am folosit operatorul +: din bonusul primei teme.
-	Pentru a realiza imparitiri, am folosit algoritmul de impartire cu rest din modulul division al primei teme.
+In general, pentru a manipula grupuri specifice de biti din variabilele folosite la fiecare etapa, am folosit operatorul +: din bonusul primei teme.
+Pentru a realiza imparitiri, am folosit algoritmul de impartire cu rest din modulul division al primei teme.
 
 - scytale_decryption: - Disclaimer: Am adaugat o conditie suplimentara pentru scytale_decryption la task 3, deoarece semnalul
 valid_i era mai lung decat sirul de caractere trimise, anume: if(valid_i == 1 && data_i != 0), pentru a asigura faptul ca nu mai
 sunt luate in considerare caracterele nule, chiar daca valid_i ramane activ.
 
-			 In cadrul decriptarii scytale, am folosit urmatoarea logica:
+###In cadrul decriptarii scytale, am folosit urmatoarea logica:
 
 - Datele se citesc atat timp cat semnalul valid_input este activ, iar datele nu sunt nule. Cat timp literele sunt diferite de caracterul
 special 0xFA, sunt numarate caracterele, stocate datele (in variabila full_text) si actulaizata pozitia, adica deplasarea prin full_text
@@ -87,9 +93,7 @@ Cand current_char depaseste numarul de caractere, semnalele se reseteaza. Cand n
 depaseasca valoarea catului.
 
 
-Pentru cheia 3, am gasit o regula care functioneaza pentru anumite cuvinte criptate complet, iar pentru altele partial, din cate se
-observa pe checker. Spre exemplu, reprezentand scrierea pe diagonala pentru ANAAREMERESIPERE si notand de la stanga la dreapta incepand
-cu indexul 0, fiecare caracter, se obtine urmatoarea secventa:
+Pentru cheia 3, am gasit o regula care functioneaza pentru anumite cuvinte criptate complet, iar pentru altele partial. Spre exemplu, reprezentand scrierea pe diagonala pentru ANAAREMERESIPERE si notand de la stanga la dreapta incepand cu indexul 0, fiecare caracter, se obtine urmatoarea secventa:
 
 0 4 12 5 1 6 13 7 2 8 14 9 3 10 15 11
 
@@ -149,13 +153,13 @@ Regula decripteaza complet doar anumite input-uri.
 
 ## demux: In structura care depinde de master, always @(posedge clk_mst):
 
-	- Daca valid_input este activ, se stocheaza datele primite (stored_data) si se activeaza semnalul de valid_output pentru
+- Daca valid_input este activ, se stocheaza datele primite (stored_data) si se activeaza semnalul de valid_output pentru
 select-ul corespunzator. Daca valid_input este 0, atunci valid_output devine 0 pentru   toate semnalele, iar stored_data
 devine 0. (ca un reset in functie de input).
 
-	In structura care depinde de sistem, always @(posedge clk_sys):
+### In structura care depinde de sistem, always @(posedge clk_sys):
 
-	- Am folosit mai multe variabile de tip contor pentru a tine cont de numarul de fronturi pozitive ale ceasului clk_sys
+- Am folosit mai multe variabile de tip contor pentru a tine cont de numarul de fronturi pozitive ale ceasului clk_sys
 si de indexul corespunzator caracterului ce trebuie afisat din stored_data sau data_i. Astfel, transmission_index este un
 counter in functie de valoarea caruia se afiseaza caracterul corespunzator pentru iesire, clk_fronts_passed numara fronturile
 pozitive ale ceasului de la activarea valid_input, iar timer numara fronturile pozitive incepand cu momentul in care valid_i
@@ -164,7 +168,7 @@ singur dupa 4 clk sys. In prev_clk_fronts_passed, se tine minte numarul de front
 Atunci cand numarul de fronturi curent clk_fronts_passed devine egal cu prev_clk_fronts_passed, adica nu mai este incrementat
 dupa transmiterea datelor, timer-ul mentionat mai devreme incepe sa numere.
 
-	- Din cauza faptului ca stocarea datelor depinde de clk_mst, la momentul in care s-au numarat 4 fronturi de clk_sys (0-3),
+- Din cauza faptului ca stocarea datelor depinde de clk_mst, la momentul in care s-au numarat 4 fronturi de clk_sys (0-3),
 valoarea variabilei stored_data inca nu s-a actualizat. Modificarea lui data_output (data0/1/2_o) se face in functie de
 valoarea din stored_data. In consecinta, pentru a gestiona afisarea primului caracter, am tratat separat cazul in care indexul
 de transmitere a datelor este 0 (si numarul de fronturi numarate este 4). In loc de a atribui lui data_output valoarea din stored_data,
@@ -184,7 +188,7 @@ data_output ia valoarea primului caracter direct din data_i. Restul caracterelor
 pe semnalul de iesire data_o se punea valoarea corespunzatoare (respectiv data0/1/2_i), iar valid_o devine activ.
 Pentru semnalele valid_input 0, iesirile vor fi 0.
 
-## decryption_top: Selectie biti specifici:
+## decryption_top: Selectie biti specifici
 
-			- select: Din cauza variatiei marimii semnalului select (16 biti in decryption_regfile si 2 biti in demux si mux), am selectat doar bitii 1 si 0 in mux si demux.
-			- scytale_key: scytale_key este impartit in 2 semnale de 8 biti pentru cele doua chei (scytale_key[15: 8], scytale_key[7 : 0])
+- select: Din cauza variatiei marimii semnalului select (16 biti in decryption_regfile si 2 biti in demux si mux), am selectat doar bitii 1 si 0 in mux si demux.
+- scytale_key: scytale_key este impartit in 2 semnale de 8 biti pentru cele doua chei (scytale_key[15: 8], scytale_key[7 : 0])
