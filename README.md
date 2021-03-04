@@ -2,7 +2,7 @@
 
 ## Prezentarea generala a sistemului:
 
-![schema](./pictures/decr2.png)
+![schema](./pictures/decr2.PNG)
 
 Am tratat implementarea in 3 etape:
 
