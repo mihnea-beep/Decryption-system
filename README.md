@@ -2,6 +2,8 @@
 
 ## Prezentarea generala a sistemului:
 
+![schema](./pictures/decr2.png)
+
 Am tratat implementarea in 3 etape:
 
 - implementarea bancului de registri
